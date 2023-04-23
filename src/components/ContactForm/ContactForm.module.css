@@ -1,0 +1,35 @@
+.form {
+  max-width: 300px;
+  margin-bottom: 15px;
+  padding: 15px;
+  border: 1px solid;
+}
+
+.label {
+  display: flex;
+  flex-direction: column;
+  margin-bottom: 15px;
+}
+
+.input {
+  border: 1px solid lightgray;
+  margin-top: 5px;
+  cursor: pointer;
+}
+
+.button__wrapper {
+  margin-top: 25px;
+}
+
+.button {
+  padding: 2px 10px;
+  border: 1px solid black;
+  border-radius: 3px;
+  background-color: transparent;
+  cursor: pointer;
+}
+
+.button:hover,
+.button:focus {
+  background-color: lightgray;
+}

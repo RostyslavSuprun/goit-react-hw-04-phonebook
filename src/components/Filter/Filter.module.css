@@ -1,0 +1,12 @@
+.label {
+  display: flex;
+  flex-direction: column;
+  margin-bottom: 15px;
+}
+
+.input {
+  border: 1px solid lightgray;
+  max-width: 300px;
+  margin-top: 5px;
+  cursor: pointer;
+}
