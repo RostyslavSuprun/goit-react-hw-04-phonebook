@@ -1,89 +1,55 @@
-import { Component } from 'react';
-
+import { useState } from 'react';
+import { nanoid } from 'nanoid';
 import Container from './components/Container/Container';
-import ContactForm from './components/ContactForm/ContactForm';
-
-import Filter from './components/Filter/Filter';
+import { ContactForm } from './components/ContactForm/ContactForm';
+import { Filter } from './components/Filter/Filter';
 import ContactList from './components/ContactList/ContactList';
+import useLocalStorage from 'components/LocalStorage/useLocalStorage';
 
-import styles from './App.module.css';
+export function App() {
+  const [contacts, setContacts] = useLocalStorage('contacts', []);
+  const [filter, setFilter] = useState('');
 
-class App extends Component {
-  // Стейт очищено при першому старті
-  state = {
-    contacts: [],
-    filter: '',
-  };
-  // Перевірка наявності збережених контактів в локалсториджі
-  componentDidMount() {
-    const localContacts = localStorage.getItem('contacts');
-    if (localContacts) {
-      this.setState({ contacts: JSON.parse(localContacts) });
-    }
-  }
-  // зміна збережених контактів після апдейту стейту
-  componentDidUpdate() {
-    const { contacts } = this.state;
-    localStorage.setItem('contacts', JSON.stringify(contacts));
-  }
+  const formSubmitData = (name, number) => {
+    const addContact = { id: nanoid(), name, number };
 
-  // Метод, що додає контакт
-  addContact = newContact => {
-    // Перевірка на дублювання
-    const duplicateName = this.state.contacts.find(
-      contact => contact.name === newContact.name
+    const isFindCopyContact = contacts.find(
+      el => el.name.toLocaleLowerCase() === name.toLocaleLowerCase()
     );
 
-    if (duplicateName) {
-      alert(`${newContact.name} is already on contacts`);
+    if (isFindCopyContact) {
+      alert(`${name} is in your Contacts`);
       return;
     }
 
-    this.setState(({ contacts }) => ({
-      contacts: [newContact, ...contacts],
-    }));
-  };
-
-  // Метод, що спостерігає за полем фільтрації і пише в стейт
-  changeFilter = event => {
-    this.setState({ filter: event.currentTarget.value });
-  };
-
-  // Метод для фільтрування контактів по введеним у полі пошука і повернення результату фільтру
-  filterContacts = () => {
-    const { contacts, filter } = this.state;
-
-    const normalizedFilter = filter.toLowerCase();
-
-    return contacts.filter(contact =>
-      contact.name.toLowerCase().includes(normalizedFilter)
+    const sortArr = [...contacts, addContact].sort((a, b) =>
+      a.name.localeCompare(b.name)
     );
+
+    setContacts(sortArr);
   };
 
-  // Метод для видалення контакту
-  deleteContact = id => {
-    this.setState(prevState => ({
-      contacts: prevState.contacts.filter(contact => contact.id !== id),
-    }));
+  const deleteContact = contactId => {
+    setContacts(contacts.filter(contact => contact.id !== contactId));
   };
 
-  render() {
-    const { filter } = this.state;
-    const filteredResults = this.filterContacts();
+  const changeFilter = e => {
+    setFilter(e.currentTarget.value);
+  };
 
-    return (
-      <Container>
-        <h1 className={styles.title}>Phonebook</h1>
-        <ContactForm onSubmit={this.addContact} />
-        <h2 className={styles.title}>Contacts</h2>
-        <Filter value={filter} onChange={this.changeFilter} />
-        <ContactList
-          contacts={filteredResults}
-          onDeleteContact={this.deleteContact}
-        />
-      </Container>
-    );
-  }
+  const getVisibleFilter = () =>
+    contacts.filter(el => el.name.toLowerCase().includes(filter.toLowerCase()));
+
+  return (
+    <Container>
+      <h1>Phonebook</h1>
+      <ContactForm onData={formSubmitData} />
+      <h2>Contacts</h2>
+      <Filter value={filter} onChangeFilter={changeFilter} />
+      <ContactList
+        contacts={getVisibleFilter()}
+        onDeleteContact={deleteContact}
+      />
+    </Container>
+  );
 }
-
-export default App;
